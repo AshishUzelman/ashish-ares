@@ -1,17 +1,12 @@
 'use client'
 import { Database, ShieldAlert } from 'lucide-react'
 import { useMemoryState } from '@/hooks/useMemoryState'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { db } from '@/lib/firebase/config'
 
 export default function SystemHeader() {
   const { isStale } = useMemoryState()
-  const [firestoreReady, setFirestoreReady] = useState(false)
-
-  useEffect(() => {
-    // db will be defined if Firebase initialized successfully
-    setFirestoreReady(!!db)
-  }, [])
+  const [firestoreReady, setFirestoreReady] = useState(!!db)
 
   return (
     <header className="flex justify-between items-end pb-4 border-b border-zinc-200 dark:border-zinc-800">
@@ -26,11 +21,10 @@ export default function SystemHeader() {
             <span>Memory Stale — Save Needed</span>
           </div>
         )}
-        <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border shadow-sm ${
-          firestoreReady
+        <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border shadow-sm ${firestoreReady
             ? 'bg-white dark:bg-black border-zinc-200 dark:border-zinc-800'
             : 'bg-rose-50 dark:bg-rose-900/20 border-rose-200 dark:border-rose-900/50'
-        }`}>
+          }`}>
           <Database size={16} className={firestoreReady ? 'text-emerald-500' : 'text-rose-500'} />
           <span>{firestoreReady ? 'Firestore Connected' : 'Firestore Disconnected'}</span>
         </div>

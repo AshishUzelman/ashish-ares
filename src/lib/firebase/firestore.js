@@ -1,40 +1,38 @@
 import { collection, onSnapshot, query, orderBy, limit, addDoc, serverTimestamp } from 'firebase/firestore'
 import { db } from './config'
 
+const onError = (label) => (err) => console.error(`[ARES Firestore] ${label}:`, err.message)
+
 // Agent State — real-time listener, all agents
 export function subscribeToAgentState(callback) {
   const q = query(collection(db, 'agent_state'), orderBy('lastActive', 'desc'))
   return onSnapshot(q, (snapshot) => {
-    const agents = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
-    callback(agents)
-  })
+    callback(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })))
+  }, onError('agent_state'))
 }
 
 // Task Queue — real-time listener, most recent 50 tasks
 export function subscribeToTasks(callback) {
   const q = query(collection(db, 'tasks'), orderBy('updatedAt', 'desc'), limit(50))
   return onSnapshot(q, (snapshot) => {
-    const tasks = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
-    callback(tasks)
-  })
+    callback(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })))
+  }, onError('tasks'))
 }
 
 // Token Usage — real-time listener, most recent 100 records
 export function subscribeToTokenUsage(callback) {
   const q = query(collection(db, 'token_usage'), orderBy('timestamp', 'desc'), limit(100))
   return onSnapshot(q, (snapshot) => {
-    const records = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
-    callback(records)
-  })
+    callback(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })))
+  }, onError('token_usage'))
 }
 
-// Memory — real-time listener, active records only (archivedAt == null)
+// Memory — real-time listener, ordered by timestamp desc
 export function subscribeToMemory(callback) {
   const q = query(collection(db, 'memory'), orderBy('timestamp', 'desc'))
   return onSnapshot(q, (snapshot) => {
-    const records = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
-    callback(records)
-  })
+    callback(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })))
+  }, onError('memory'))
 }
 
 // Token Usage — append only. Never call update/delete on this collection.
