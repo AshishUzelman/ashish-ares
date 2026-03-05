@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "connector": "node scripts/agent_connector.js",
+    "save": "node scripts/save_to_drive.js",
+    "context": "node scripts/load_context.js"
   },
   "dependencies": {
     "firebase": "^12.10.0",
