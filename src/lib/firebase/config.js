@@ -11,8 +11,18 @@ const firebaseConfig = {
     appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID
 };
 
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
-const auth = typeof window !== 'undefined' ? getAuth(app) : null;
-const db = getFirestore(app);
+// Guard: don't call initializeApp with empty credentials — Firebase 12 throws at module load
+const hasConfig = !!(firebaseConfig.apiKey && firebaseConfig.projectId && firebaseConfig.appId);
+
+if (!hasConfig) {
+    console.warn('[ARES] Firebase env vars missing. Fill in .env.local to connect to Firestore.');
+}
+
+const app = hasConfig
+    ? (getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0])
+    : null;
+
+const auth = (hasConfig && typeof window !== 'undefined') ? getAuth(app) : null;
+const db = hasConfig ? getFirestore(app) : null;
 
 export { app, auth, db };

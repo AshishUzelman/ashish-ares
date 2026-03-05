@@ -2,9 +2,15 @@ import { collection, onSnapshot, query, orderBy, limit, addDoc, serverTimestamp 
 import { db } from './config'
 
 const onError = (label) => (err) => console.error(`[ARES Firestore] ${label}:`, err.message)
+const noOp = () => {}
+const notReady = (label) => {
+  console.warn(`[ARES] Firestore not ready — skipping ${label} subscription`)
+  return noOp
+}
 
 // Agent State — real-time listener, all agents
 export function subscribeToAgentState(callback) {
+  if (!db) return notReady('agent_state')
   const q = query(collection(db, 'agent_state'), orderBy('lastActive', 'desc'))
   return onSnapshot(q, (snapshot) => {
     callback(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })))
@@ -13,6 +19,7 @@ export function subscribeToAgentState(callback) {
 
 // Task Queue — real-time listener, most recent 50 tasks
 export function subscribeToTasks(callback) {
+  if (!db) return notReady('tasks')
   const q = query(collection(db, 'tasks'), orderBy('updatedAt', 'desc'), limit(50))
   return onSnapshot(q, (snapshot) => {
     callback(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })))
@@ -21,6 +28,7 @@ export function subscribeToTasks(callback) {
 
 // Token Usage — real-time listener, most recent 100 records
 export function subscribeToTokenUsage(callback) {
+  if (!db) return notReady('token_usage')
   const q = query(collection(db, 'token_usage'), orderBy('timestamp', 'desc'), limit(100))
   return onSnapshot(q, (snapshot) => {
     callback(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })))
@@ -29,6 +37,7 @@ export function subscribeToTokenUsage(callback) {
 
 // Memory — real-time listener, ordered by timestamp desc
 export function subscribeToMemory(callback) {
+  if (!db) return notReady('memory')
   const q = query(collection(db, 'memory'), orderBy('timestamp', 'desc'))
   return onSnapshot(q, (snapshot) => {
     callback(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })))
